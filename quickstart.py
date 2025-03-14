@@ -53,6 +53,10 @@ def load_credentials():
   if running_on_lambda:
       print("Fetching credentials from AWS Secrets Manager")
       token_data = get_secret("GMAIL-OAUTH-TOKEN")
+
+      if "refresh_token" not in token_data:
+        print("Warning: Refresh token is missing. OAuth flow may be required.")
+        
       creds = Credentials.from_authorized_user_info(token_data, SCOPES)
   elif os.path.exists("credentials/token.json"):
       print("Using local token.json")
