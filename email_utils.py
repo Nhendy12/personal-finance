@@ -120,7 +120,7 @@ def get_sheet_name():
 # Google Sheets API Authentication
 def authenticate_google_sheets():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    #   creds_data = get_secret("GOOGLE_SERVICE_ACCOUNT_CREDENTIALS")
+    #   creds_data = get_secret("GOOGLE-SERVICE-ACCOUNT-CREDENTIALS")
     creds = ServiceAccountCredentials.from_json_keyfile_name("./credentials/service-account-credentials.json", scope)
     client = gspread.authorize(creds)
     return client
