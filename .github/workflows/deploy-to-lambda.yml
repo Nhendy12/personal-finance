@@ -26,11 +26,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -t ./lambda_package/
 
-      # Step 4: Package Lambda function
-      - name: Package Lambda function
+      # Step 4: Package all files for Lambda
+      - name: Package all files
         run: |
-          # Add the function code to the package
-          cp -r * ./lambda_package/
+          rsync -av --exclude 'lambda_package' ./ ./lambda_package/
           # You can also exclude certain files like tests, docs, etc., by modifying this command
 
           # Zip everything into a deployment package
