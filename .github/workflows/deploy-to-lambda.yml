@@ -29,8 +29,8 @@ jobs:
       # Step 4: Package all files for Lambda
       - name: Package all files
         run: |
-          rsync -av --exclude 'lambda_package' ./ ./lambda_package/
           # You can also exclude certain files like tests, docs, etc., by modifying this command
+          rsync -av --exclude 'lambda_package' ./ ./lambda_package/
 
           # Zip everything into a deployment package
           cd lambda_package
@@ -47,4 +47,4 @@ jobs:
           pip install awscli
           aws lambda update-function-code \
             --function-name email-to-sheets \
-            --zip-file fileb://lambda_function.zip
+            --zip-file fileb://lambda_package.zip
