@@ -129,10 +129,13 @@ def insert_transaction(sheet_name, date, amount, description):
     client = authenticate_google_sheets()
     sheet = client.open(sheet_name).worksheet('Transactions')
     
+    amount = float(amount.lstrip("'"))
+    rounded_amount = round(amount, 2)
+
     # Insert transaction details as a new row in first empty row found from Column C
     next_row = len(sheet.col_values(3)) + 1 
     print(f"next_row {next_row}")
 
-    sheet.update(f"B{next_row}:D{next_row}", [[date, amount, description]])
+    sheet.update(f"B{next_row}:D{next_row}", [[date, rounded_amount, description]])
 
     print(f"Inserted at row {next_row}")
