@@ -13,6 +13,8 @@ from email_types.discover_email import discover_subject_check, discover_get_tran
 from email_types.fidelity_email import fidelity_subject_check, fidelity_get_trancstion_details
 from email_types.venmo_email import venmo_subject_check, venmo_get_trancstion_details
 
+from quickstart import is_running_in_lambda, get_secret
+
 def get_email_contents(service, message_id):
     # print(f"Message ID: {message_id}")
     message = service.users().messages().get(userId="me", id=message_id, format="full").execute()
@@ -120,8 +122,14 @@ def get_sheet_name():
 # Google Sheets API Authentication
 def authenticate_google_sheets():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    #   creds_data = get_secret("GOOGLE-SERVICE-ACCOUNT-CREDENTIALS")
-    creds = ServiceAccountCredentials.from_json_keyfile_name("./credentials/service-account-credentials.json", scope)
+    if is_running_in_lambda():    
+        creds_data = get_secret("GOOGLE-SERVICE-ACCOUNT-CREDENTIALS")
+        if not creds_data:
+            raise Exception("Failed to retrieve Google credentials from AWS Secrets Manager.")
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_data, scope)
+    else:
+        creds = ServiceAccountCredentials.from_json_keyfile_name("./credentials/service-account-credentials.json", scope)
+    
     client = gspread.authorize(creds)
     return client
 
