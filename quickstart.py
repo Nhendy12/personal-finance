@@ -37,7 +37,7 @@ def run_oauth_flow():
 def save_credentials(creds):
   if is_running_in_lambda() == True:
       boto3.client("secretsmanager").update_secret(
-          SecretId="GmailOAuthToken", SecretString=creds.to_json()
+          SecretId="GMAIL-OAUTH-TOKEN", SecretString=creds.to_json()
       )
   else:
       with open("credentials/token.json", "w") as token:
