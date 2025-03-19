@@ -89,26 +89,27 @@ def main():
   creds = authenticate_gmail()
 
   try:
-    yesterday = datetime.now(timezone.utc) - timedelta(days=1)
+    # Set Pacific Timezone
+    PT = timezone(timedelta(hours=-7))
 
-    print(f"datetime.utcnow(): {datetime.now(timezone.utc)}")
-    print(f"yesterday: {yesterday}")
+    # Get yesterday in Pacific Time
+    now_pt = datetime.now(PT)
+    yesterday = now_pt - timedelta(days=1)
 
     start_of_yesterday = (yesterday.replace(hour=0, minute=0, second=0, microsecond=0))
     end_of_yesterday = yesterday.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    print(f"start_of_yesterday: {start_of_yesterday}")
-    print(f"end_of_yesterday: {end_of_yesterday}")
-
+    start_of_yesterday_utc = start_of_yesterday.astimezone(timezone.utc)
+    end_of_yesterday_utc = end_of_yesterday.astimezone(timezone.utc)
+    
     # Convert to UNIX timestamps (Gmail API uses seconds)
-    start_of_yesterday_ts = int(start_of_yesterday.timestamp())
-    end_of_yesterday_ts = int(end_of_yesterday.timestamp())
-
-    print(f"start_of_yesterday_ts: {start_of_yesterday_ts}")
-    print(f"end_of_yesterday_ts: {end_of_yesterday_ts}")
+    start_of_yesterday_ts = int(start_of_yesterday_utc.timestamp())
+    end_of_yesterday_ts = int(end_of_yesterday_utc.timestamp())
 
     query = f"after:{start_of_yesterday_ts} before:{end_of_yesterday_ts}"
-    print(f"query: {query}")
+    print(f"Pacific Start: {start_of_yesterday} -> UTC: {start_of_yesterday_utc} ({start_of_yesterday_ts})")
+    print(f"Pacific End: {end_of_yesterday} -> UTC: {end_of_yesterday_utc} ({end_of_yesterday_ts})")
+    print(f"Query: {query}")
 
     service = build("gmail", "v1", credentials=creds)
     messages = []
