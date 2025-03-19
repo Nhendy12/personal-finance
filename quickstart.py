@@ -1,6 +1,6 @@
 import os.path
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import json
 import boto3
@@ -89,9 +89,9 @@ def main():
   creds = authenticate_gmail()
 
   try:
-    yesterday = datetime.utcnow() - timedelta(days=1)
+    yesterday = datetime.now(timezone.utc) - timedelta(days=1)
 
-    print(f"datetime.utcnow(): {datetime.utcnow()}")
+    print(f"datetime.utcnow(): {datetime.now(timezone.utc)}")
     print(f"yesterday: {yesterday}")
 
     start_of_yesterday = (yesterday.replace(hour=0, minute=0, second=0, microsecond=0))
