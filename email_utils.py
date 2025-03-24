@@ -13,7 +13,7 @@ from email_types.discover_email import discover_subject_check, discover_get_tran
 from email_types.fidelity_email import fidelity_subject_check, fidelity_get_trancstion_details
 from email_types.venmo_email import venmo_subject_check, venmo_get_trancstion_details
 
-from quickstart import is_running_in_lambda, get_secret
+from auth import is_running_in_lambda, get_secret
 
 def get_email_contents(service, message_id):
     # print(f"Message ID: {message_id}")
