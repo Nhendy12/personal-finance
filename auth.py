@@ -36,9 +36,8 @@ def save_credentials(creds):
             "client_secret": creds.client_secret
         }
     if is_running_in_lambda():
-        boto3.client("secretsmanager").update_secret(
-            SecretId="GMAIL-OAUTH-TOKEN", SecretString=json.dumps(creds_json)
-        )
+        client = boto3.client("secretsmanager", region_name="us-west-1")
+        client.update_secret(SecretId="GMAIL-OAUTH-TOKEN", SecretString=json.dumps(creds_json))
     else:
         with open("credentials/token.json", "w") as token:
             json.dump(creds_json, token)
