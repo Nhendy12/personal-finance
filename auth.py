@@ -25,7 +25,7 @@ def run_oauth_flow():
         if "web" in creds_info:
             creds_info = creds_info["web"]
         
-        creds = Credentials.from_authorized_user_info(creds_data, SCOPES)
+        creds = Credentials.from_authorized_user_info(creds_info, SCOPES)
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
             'credentials/oauth-client-id.json', SCOPES)
