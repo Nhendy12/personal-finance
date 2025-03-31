@@ -9,9 +9,10 @@ from auth import authenticate_gmail, is_running_in_lambda
 def main():
   from email_utils import get_email_contents
 
-  creds = authenticate_gmail()
 
   try:
+    creds = authenticate_gmail()
+    
     # Set Pacific Timezone
     PT = timezone(timedelta(hours=-7))
 
