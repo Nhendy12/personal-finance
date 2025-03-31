@@ -17,23 +17,31 @@ def get_secret(secret_name):
     response = client.get_secret_value(SecretId=secret_name)
     return json.loads(response["SecretString"])
 
+def update_secret(secret_name, new_data):
+    client = boto3.client("secretsmanager", region_name="us-west-1")
+    client.update_secret(SecretId=secret_name, SecretString=json.dumps(new_data))
+
 def run_oauth_flow():
     if is_running_in_lambda():    
+        print("Running OAuth flow inside Lambda (manual refresh may be required)")
         creds_data = get_secret("OAUTH-CLIENT-ID")
-        token_data = get_secret("GMAIL-OAUTH-TOKEN")
 
-        CLIENT_ID, CLIENT_SECRET = creds_data['web']['client_id'], creds_data['web']['client_secret']
-        REFRESH_TOKEN = token_data["refresh_token"]
-        
-        creds = Credentials.from_authorized_user_info(
-            info={
-                "refresh_token": REFRESH_TOKEN,
+        CLIENT_ID = creds_data["web"]["client_id"]
+        CLIENT_SECRET = creds_data["web"]["client_secret"]
+
+        flow = InstalledAppFlow.from_client_config(creds_data, SCOPES)
+        creds = flow.run_console()
+
+        if creds and creds.refresh_token:
+            print("OAuth flow successful, storing new credentials.")
+            update_secret("GMAIL-OAUTH-TOKEN", {
+                "refresh_token": creds.refresh_token,
                 "client_id": CLIENT_ID,
-                "client_secret": CLIENT_SECRET
-            },
-            scopes=SCOPES
-        )
-        print(f"creds after run oauth flow: {vars(creds)}")
+                "client_secret": CLIENT_SECRET,
+                "token_uri": "https://oauth2.googleapis.com/token"
+            })
+        else:
+            print("Failed to obtain a refresh token!")
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
             'credentials/oauth-client-id.json', SCOPES)
@@ -49,8 +57,7 @@ def save_credentials(creds):
             "client_secret": creds.client_secret
         }
     if is_running_in_lambda():
-        client = boto3.client("secretsmanager", region_name="us-west-1")
-        client.update_secret(SecretId="GMAIL-OAUTH-TOKEN", SecretString=json.dumps(creds_json))
+        update_secret("GMAIL-OAUTH-TOKEN", creds_json)
     else:
         with open("credentials/token.json", "w") as token:
             json.dump(creds_json, token)
