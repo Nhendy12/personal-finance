@@ -20,12 +20,19 @@ def get_secret(secret_name):
 def run_oauth_flow():
     if is_running_in_lambda():    
         creds_data = get_secret("OAUTH-CLIENT-ID")
-        if "web" in creds_data:
-            creds_info = creds_data["web"]
-        else:
-            creds_info = creds_data
+        token_data = get_secret("GMAIL-OAUTH-TOKEN")
+
+        CLIENT_ID, CLIENT_SECRET = creds_data['web']['client_id'], creds_data['web']['client_secret']
+        REFRESH_TOKEN = token_data["refresh_token"]
         
-        creds = Credentials.from_authorized_user_info(creds_info, SCOPES)
+        creds = Credentials.from_authorized_user_info(
+            info={
+                "refresh_token": REFRESH_TOKEN,
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET
+            },
+            scopes=SCOPES
+        )
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
             'credentials/oauth-client-id.json', SCOPES)
