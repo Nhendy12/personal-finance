@@ -12,7 +12,7 @@ def main():
 
   try:
     creds = authenticate_gmail()
-    
+
     # Set Pacific Timezone
     PT = timezone(timedelta(hours=-7))
 
@@ -76,7 +76,7 @@ def send_email(error):
               "Body": {"Text": {"Data": body_text}},
           },
       )
-      print("Email sent successfully! Message ID:", response["MessageId"])
+      print("Email sent successfully! Message:", body_text)
   except Exception as e:
       print("Error sending email:", str(e))
 
