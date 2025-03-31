@@ -33,7 +33,7 @@ def run_oauth_flow():
             },
             scopes=SCOPES
         )
-        print(f"creds after run oauth flow: {creds}")
+        print(f"creds after run oauth flow: {vars(creds)}")
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
             'credentials/oauth-client-id.json', SCOPES)
