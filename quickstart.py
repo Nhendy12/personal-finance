@@ -9,7 +9,6 @@ from auth import authenticate_gmail, is_running_in_lambda
 def main():
   from email_utils import get_email_contents
 
-
   try:
     creds = authenticate_gmail()
 

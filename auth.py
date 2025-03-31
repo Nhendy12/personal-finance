@@ -20,10 +20,10 @@ def get_secret(secret_name):
 def run_oauth_flow():
     if is_running_in_lambda():    
         creds_data = get_secret("OAUTH-CLIENT-ID")
-        creds_info = json.loads(creds_data)
-
-        if "web" in creds_info:
-            creds_info = creds_info["web"]
+        if "web" in creds_data:
+            creds_info = creds_data["web"]
+        else:
+            creds_info = creds_data
         
         creds = Credentials.from_authorized_user_info(creds_info, SCOPES)
     else:
