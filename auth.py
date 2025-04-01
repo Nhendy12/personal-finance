@@ -23,25 +23,8 @@ def update_secret(secret_name, new_data):
 
 def run_oauth_flow():
     if is_running_in_lambda():    
-        print("Running OAuth flow inside Lambda (manual refresh may be required)")
-        creds_data = get_secret("OAUTH-CLIENT-ID")
-
-        CLIENT_ID = creds_data["web"]["client_id"]
-        CLIENT_SECRET = creds_data["web"]["client_secret"]
-
-        flow = InstalledAppFlow.from_client_config(creds_data, SCOPES)
-        creds = flow.run_console()
-
-        if creds and creds.refresh_token:
-            print("OAuth flow successful, storing new credentials.")
-            update_secret("GMAIL-OAUTH-TOKEN", {
-                "refresh_token": creds.refresh_token,
-                "client_id": CLIENT_ID,
-                "client_secret": CLIENT_SECRET,
-                "token_uri": "https://oauth2.googleapis.com/token"
-            })
-        else:
-            print("Failed to obtain a refresh token!")
+        print("Should not run Oauth flow inside Lambda, should run locally first instead")
+        creds = None
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
             'credentials/oauth-client-id.json', SCOPES)
