@@ -46,7 +46,7 @@ def main():
         if not next_page_token:
             break
         
-    print(f"Total emails found: {len(messages)}")
+    # print(f"Total emails found: {len(messages)}")
     print("-------------")
     for msg in messages:
         get_email_contents(service, msg["id"])

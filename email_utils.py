@@ -27,10 +27,9 @@ def get_email_contents(service, message_id):
 
     result, bank_name = is_transaction_email(sender)
     if not result: return
-    print("??????")
+    print("========")
     if date_header:
         parsed_date = parsedate_to_datetime(date_header).strftime('%m-%d-%Y')
-        # print(f"Email Date: {parsed_date.strftime('%m-%d-%Y')} (UTC: {parsed_date.astimezone().isoformat()})")
     else:
         parsed_date = ""
 
@@ -44,16 +43,16 @@ def get_email_contents(service, message_id):
         body = base64.urlsafe_b64decode(message["payload"]["body"]["data"]).decode("utf-8")
 
     should_continue, amount, description = get_details_from_transaction_email(bank_name, subject, body)
-    print(f"should_continue: {should_continue}")
+    # print(f"should_continue: {should_continue}")
 
     if not should_continue: return
-    print(f"amount: {amount}")
-    print(f"description: {description}")
-    print(f"parsed_date: {parsed_date}")
+    # print(f"amount: {amount}")
+    # print(f"description: {description}")
+    # print(f"parsed_date: {parsed_date}")
 
     # insert line item into google sheets
     insert_transaction(get_sheet_name(), parsed_date, amount, description)
-    print("??????")
+    print("========")
 
 
 def is_transaction_email(sender):
@@ -142,8 +141,6 @@ def insert_transaction(sheet_name, date, amount, description):
 
     # Insert transaction details as a new row in first empty row found from Column C
     next_row = len(sheet.col_values(3)) + 1 
-    print(f"next_row {next_row}")
-
     sheet.update(f"B{next_row}:D{next_row}", [[date, rounded_amount, description]])
 
     print(f"Inserted at row {next_row}")
