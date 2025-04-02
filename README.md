@@ -1,6 +1,6 @@
 # Personal Finance Automation
 
-Python script to parse emails and insert into data into google sheets
+Python script to parse emails and insert transcation data into google sheets
 
 ## Table of Contents 📖
 
