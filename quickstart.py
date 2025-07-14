@@ -1,16 +1,20 @@
 from datetime import datetime, timedelta, timezone
 
+import sys
 import boto3
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from auth import authenticate_gmail, is_running_in_lambda
 
-def main():
+def main(name=None):
   from email_utils import get_email_contents
 
   try:
-    creds = authenticate_gmail()
+    if not name:
+      name = get_args_name()
+
+    creds = authenticate_gmail(name)
 
     # Set Pacific Timezone
     PT = timezone(timedelta(hours=-7))
@@ -49,14 +53,25 @@ def main():
     # print(f"Total emails found: {len(messages)}")
     print("-------------")
     for msg in messages:
-        get_email_contents(service, msg["id"])
+        get_email_contents(service, msg["id"], name)
     print("-------------")
+    return f"Processed transactions for: {name}"
 
   except Exception as error:
     if is_running_in_lambda():    
         send_email(error)
     else:
       print(f"An error occurred: {error}")
+
+def get_args_name():
+        if len(sys.argv) <= 1:
+          raise Exception("Name must be included")
+   
+        import argparse
+        parser = argparse.ArgumentParser()
+        parser.add_argument('name', type=str, help='A name to process')
+        args = parser.parse_args()
+        return args.name
 
 def send_email(error):
   ses_client = boto3.client("ses", region_name="us-west-1")

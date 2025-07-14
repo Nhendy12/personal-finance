@@ -1,3 +1,4 @@
+import os.path
 import base64
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -15,7 +16,7 @@ from email_types.venmo_email import venmo_subject_check, venmo_get_trancstion_de
 
 from auth import is_running_in_lambda, get_secret
 
-def get_email_contents(service, message_id):
+def get_email_contents(service, message_id, user_prefix):
     # print(f"Message ID: {message_id}")
     message = service.users().messages().get(userId="me", id=message_id, format="full").execute()
     
@@ -51,7 +52,7 @@ def get_email_contents(service, message_id):
     # print(f"parsed_date: {parsed_date}")
 
     # insert line item into google sheets
-    insert_transaction(get_sheet_name(), parsed_date, amount, description)
+    insert_transaction(user_prefix, get_sheet_name(), parsed_date, amount, description)
     print("========")
 
 
@@ -119,21 +120,25 @@ def get_sheet_name():
     return f"{previous_month} {previous_year} Budget"
     
 # Google Sheets API Authentication
-def authenticate_google_sheets():
+def authenticate_google_sheets(user_prefix):
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    if is_running_in_lambda():    
-        creds_data = get_secret("GOOGLE-SERVICE-ACCOUNT-CREDENTIALS")
+    if is_running_in_lambda():   
+        secret_name = f"{user_prefix}-GOOGLE-SERVICE-ACCOUNT-CREDENTIALS" 
+        creds_data = get_secret(secret_name)
         if not creds_data:
             raise Exception("Failed to retrieve Google credentials from AWS Secrets Manager.")
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_data, scope)
     else:
-        creds = ServiceAccountCredentials.from_json_keyfile_name("./credentials/service-account-credentials.json", scope)
+        creds_path = f"./{user_prefix}-credentials/service-account-credentials.json"
+        if not os.path.exists(creds_path):
+            raise Exception(f"Missing local service account credentials at {creds_path}")
+        creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
     
     client = gspread.authorize(creds)
     return client
 
-def insert_transaction(sheet_name, date, amount, description):
-    client = authenticate_google_sheets()
+def insert_transaction(user_prefix, sheet_name, date, amount, description):
+    client = authenticate_google_sheets(user_prefix)
     sheet = client.open(sheet_name).worksheet('Transactions')
     
     amount = float(amount.lstrip("'"))

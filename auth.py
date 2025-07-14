@@ -21,17 +21,17 @@ def update_secret(secret_name, new_data):
     client = boto3.client("secretsmanager", region_name="us-west-1")
     client.update_secret(SecretId=secret_name, SecretString=json.dumps(new_data))
 
-def run_oauth_flow():
+def run_oauth_flow(user_prefix):
     if is_running_in_lambda():    
         print("Should not run Oauth flow inside Lambda, should run locally first instead")
         creds = None
     else:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            'credentials/oauth-client-id.json', SCOPES)
+        cred_path = f"{user_prefix}-credentials/oauth-client-id.json"
+        flow = InstalledAppFlow.from_client_secrets_file(cred_path, SCOPES)
         creds = flow.run_local_server(port=8080)
     return creds
 
-def save_credentials(creds):
+def save_credentials(creds, user_prefix):
     creds_json = {
             "token": creds.token,
             "refresh_token": creds.refresh_token,
@@ -40,12 +40,14 @@ def save_credentials(creds):
             "client_secret": creds.client_secret
         }
     if is_running_in_lambda():
-        update_secret("GMAIL-OAUTH-TOKEN", creds_json)
+        secret_name = f"{user_prefix}-GMAIL-OAUTH-TOKEN"
+        update_secret(secret_name, creds_json)
     else:
-        with open("credentials/token.json", "w") as token:
-            json.dump(creds_json, token)
+        os.makedirs(f"{user_prefix}-credentials", exist_ok=True)
+        with open(f"{user_prefix}-credentials/token.json", "w") as token_file:
+            json.dump(creds_json, token_file)
 
-def load_credentials():
+def load_credentials(user_prefix):
     # Load credentials from local file (if available) or AWS Secrets Manager.
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -54,21 +56,24 @@ def load_credentials():
     running_on_lambda = is_running_in_lambda()
     if running_on_lambda:
         print("Fetching credentials from AWS Secrets Manager")
-        token_data = get_secret("GMAIL-OAUTH-TOKEN")
+        secret_name = f"{user_prefix}-GMAIL-OAUTH-TOKEN"
+        token_data = get_secret(secret_name)
 
         if "refresh_token" not in token_data:
             print("Warning: Refresh token is missing. OAuth flow may be required.")
         
         creds = Credentials.from_authorized_user_info(token_data, SCOPES)
-    elif os.path.exists("credentials/token.json"):
-        print("Using local token.json")
-        creds = Credentials.from_authorized_user_file("credentials/token.json", SCOPES)
+    else:
+        token_path = f"{user_prefix}-credentials/token.json"
+        if os.path.exists(token_path):
+            print(f"Using local token: {token_path}")
+            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
 
     return creds
 
-def authenticate_gmail():
+def authenticate_gmail(user_prefix):
     # Authenticate with Gmail API, handling token refresh if needed
-    creds = load_credentials()
+    creds = load_credentials(user_prefix)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             try:
@@ -81,8 +86,8 @@ def authenticate_gmail():
         # If creds are still invalid, trigger OAuth flow
         if not creds or not creds.valid:
             print("Running OAuth flow.")
-            creds = run_oauth_flow()
+            creds = run_oauth_flow(user_prefix)
 
-        save_credentials(creds)
+        save_credentials(creds, user_prefix)
 
     return creds
