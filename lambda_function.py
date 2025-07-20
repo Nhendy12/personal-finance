@@ -4,8 +4,7 @@ import quickstart
 def lambda_handler(event, context):
     """AWS Lambda entry point"""
     try:
-        # names = ["nick", "terra"]
-        names = ["nick"]
+        names = ["nick", "terra"]
         results = []
 
         for name in names:

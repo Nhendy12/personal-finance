@@ -175,3 +175,5 @@ cython_debug/
 
 credentials/
 aws_secrets
+nick-credentials/
+terra-credentials/
