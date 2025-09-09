@@ -8,15 +8,16 @@ dynamodb = boto3.client("dynamodb")
 TABLE_NAME = "DailyJobRuns"
 
 def has_already_run(user, run_date):
+    composite_id = f"{user}#{run_date}"
+
     try:
         # fails if record already exists
         dynamodb.put_item(
             TableName=TABLE_NAME,
             Item={
-                "user_id": {"S": user},
-                "run_date": {"S": run_date},
+                "user_id": {"S": composite_id},
             },
-            ConditionExpression="attribute_not_exists(user_id) AND attribute_not_exists(run_date)"
+            ConditionExpression="attribute_not_exists(user_id)"
         )
         return False
     except ClientError as e:
