@@ -43,7 +43,7 @@ def lambda_handler(event, context):
             results.append(result)
 
         print("****************")
-        print(f"Finsished with results: {result}")
+        print(f"Finsished with results: {results}")
         print("****************")
 
         return {
