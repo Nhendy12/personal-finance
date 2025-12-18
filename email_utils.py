@@ -141,7 +141,7 @@ def insert_transaction(user_prefix, sheet_name, date, amount, description):
     client = authenticate_google_sheets(user_prefix)
     sheet = client.open(sheet_name).worksheet('Transactions')
     
-    amount = float(amount.lstrip("'"))
+    amount = float(amount.lstrip("'")) if amount is not None else 1.00
     rounded_amount = round(amount, 2)
 
     # Insert transaction details as a new row in first empty row found from Column C
