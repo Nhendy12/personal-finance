@@ -4,6 +4,8 @@ BANK_EMAILS = {
     "Discover": "discover@services.discover.com",
     "Fidelity": "fidelityealerts@alert.fidelityrewards.com",
     "Venmo": "venmo@venmo.com",
+    "Boa": "onlinebanking@ealerts.bankofamerica.com",
+    
 
     # "should get this one" : "no-reply@lyftmail.com",
     # "should get this one too" : "dailydigest@email.join1440.com",

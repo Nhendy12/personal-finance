@@ -13,6 +13,7 @@ from email_types.citi_email import citi_subject_check, citi_get_trancstion_detai
 from email_types.discover_email import discover_subject_check, discover_get_trancstion_details
 from email_types.fidelity_email import fidelity_subject_check, fidelity_get_trancstion_details
 from email_types.venmo_email import venmo_subject_check, venmo_get_trancstion_details
+from email_types.boa_email import boa_subject_check, boa_get_trancstion_details
 
 from auth import is_running_in_lambda, get_secret
 
@@ -69,6 +70,7 @@ BANK_SUBJECT_CHECKS = {
     "Discover": discover_subject_check,
     "Fidelity": fidelity_subject_check,
     "Venmo": venmo_subject_check,
+    "Boa": boa_subject_check,
 }
 
 BANK_GET_TRANSACTION_DETAILS = {
@@ -77,6 +79,7 @@ BANK_GET_TRANSACTION_DETAILS = {
     "Discover": discover_get_trancstion_details,
     "Fidelity": fidelity_get_trancstion_details,
     "Venmo": venmo_get_trancstion_details,
+    "Boa": boa_get_trancstion_details,
 }
 
 def default_bank_function(subject):
