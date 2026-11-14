@@ -142,7 +142,18 @@ def authenticate_google_sheets(user_prefix):
 
 def insert_transaction(user_prefix, sheet_name, date, amount, description):
     client = authenticate_google_sheets(user_prefix)
-    sheet = client.open(sheet_name).worksheet('Transactions')
+    try:
+        spreadsheet = client.open(sheet_name)
+    except gspread.SpreadsheetNotFound:
+        # gspread raises this with the raw HTTP response as its message, which prints as "<Response [200]>"
+        raise Exception(
+            f"Spreadsheet '{sheet_name}' not found. Make sure it exists and is shared with "
+            f"the service account {client.http_client.auth.service_account_email}."
+        ) from None
+    try:
+        sheet = spreadsheet.worksheet('Transactions')
+    except gspread.WorksheetNotFound:
+        raise Exception(f"Spreadsheet '{sheet_name}' has no 'Transactions' tab.") from None
     
     amount = float(amount.lstrip("'").replace(",", "")) if amount is not None else 1.00
     rounded_amount = round(amount, 2)

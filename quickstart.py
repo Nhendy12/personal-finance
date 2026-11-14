@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import sys
+import traceback
 import boto3
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -58,10 +59,11 @@ def main(name=None):
     return f"Processed transactions for: {name}"
 
   except Exception as error:
-    if is_running_in_lambda():    
-        send_email(error)
+    if is_running_in_lambda():
+        send_email(error, name)
     else:
-      print(f"An error occurred: {error}")
+      print(f"An error occurred: {type(error).__name__}: {error}")
+      traceback.print_exc()
 
 def get_args_name():
         if len(sys.argv) <= 1:
@@ -73,13 +75,21 @@ def get_args_name():
         args = parser.parse_args()
         return args.name
 
-def send_email(error):
+def send_email(error, name=None):
   ses_client = boto3.client("ses", region_name="us-west-1")
 
   sender_email = "nickh1225@gmail.com"
   recipient_email = "nickh1225@gmail.com"
-  subject = "AWS Lambda Failure"
-  body_text = f"Failure when running lamdba function error: {error}"
+  error_type = type(error).__name__
+  subject = f"Personal finance Lambda failed for {name or 'unknown user'}: {error_type}"
+  stack = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+  body_text = (
+      f"User: {name or 'unknown'}\n"
+      f"Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}\n"
+      f"Error: {error_type}: {error}\n"
+      f"\n"
+      f"Traceback:\n{stack}"
+  )
 
   try:
       response = ses_client.send_email(
