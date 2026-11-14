@@ -29,7 +29,8 @@ def has_already_run(user, run_date):
 def lambda_handler(event, context):
     """AWS Lambda entry point"""
 
-    names = ["nick", "terra"]
+    # names = ["nick", "terra"]
+    names = ["nick"]
     results = []
     today = datetime.utcnow().strftime("%Y-%m-%d")
 
